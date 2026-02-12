@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IA Offline Inteligente</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #0f172a;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.chat {
+    width: 420px;
+    background: #1e293b;
+    padding: 15px;
+    border-radius: 12px;
+}
+
+#messages {
+    height: 350px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+}
+
+.input-area {
+    display: flex;
+}
+
+input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+}
+
+button {
+    padding: 10px;
+    margin-left: 5px;
+    border: none;
+    border-radius: 6px;
+    background: #3b82f6;
+    color: white;
+    cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<div class="chat">
+    <h3>🤖 IA Offline</h3>
+    <div id="messages"></div>
+
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Digite ou fale...">
+        <button onclick="sendMessage()">Enviar</button>
+        <button onclick="startVoice()">🎤</button>
+    </div>
+</div>
+
+<script>
+let memory = [];
+
+const knowledgeBase = {
+    "oi": ["Olá 😄", "Oi, tudo bem?", "E aí! Como posso ajudar?"],
+    "tudo bem": ["Estou funcionando perfeitamente!", "Tudo ótimo por aqui 😎"],
+    "seu nome": ["Eu sou sua IA Offline inteligente!"],
+    "idade": ["Eu não tenho idade, sou um programa 😄"],
+    "criador": ["Fui criada usando HTML, CSS e JavaScript."]
+};
+
+function addMessage(sender, text) {
+    const messages = document.getElementById("messages");
+    messages.innerHTML += `<p><strong>${sender}:</strong> ${text}</p>`;
+    messages.scrollTop = messages.scrollHeight;
+}
+
+function sendMessage() {
+    const input = document.getElementById("userInput");
+    const message = input.value.trim();
+    if (!message) return;
+
+    addMessage("Você", message);
+    memory.push(message);
+
+    const response = generateResponse(message);
+    addMessage("IA", response);
+    speak(response);
+
+    input.value = "";
+}
+
+function generateResponse(input) {
+    input = input.toLowerCase();
+
+    // Procurar na base de conhecimento
+    for (let key in knowledgeBase) {
+        if (input.includes(key)) {
+            return randomResponse(knowledgeBase[key]);
+        }
+    }
+
+    // Respostas inteligentes genéricas
+    if (input.includes("?")) {
+        return "Boa pergunta! Pode me explicar melhor o que você quer saber?";
+    }
+
+    if (input.length > 20) {
+        return "Interessante... me conta mais sobre isso.";
+    }
+
+    // Resposta baseada em memória
+    if (memory.length > 3) {
+        return "Você tem falado bastante sobre isso. Quer se aprofundar mais?";
+    }
+
+    return randomResponse([
+        "Entendi...",
+        "Interessante 🤔",
+        "Pode me explicar melhor?",
+        "Continue...",
+        "Estou aprendendo com você 😄"
+    ]);
+}
+
+function randomResponse(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// 🎤 Reconhecimento de voz
+function startVoice() {
+    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+    recognition.lang = "pt-BR";
+    recognition.start();
+
+    recognition.onresult = function(event) {
+        const text = event.results[0][0].transcript;
+        document.getElementById("userInput").value = text;
+        sendMessage();
+    };
+}
+
+// 🔊 Falar resposta
+function speak(text) {
+    const speech = new SpeechSynthesisUtterance(text);
+    speech.lang = "pt-BR";
+    window.speechSynthesis.speak(speech);
+}
+</script>
+
+</body>
+  </html>
